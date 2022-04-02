@@ -3,6 +3,7 @@
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
 from starkware.starknet.common.syscalls import get_caller_address
+from starkware.cairo.common.math import assert_lt, assert_not_zero
 
 from contracts.token.ERC20.ERC20_base import (
     ERC20_name,
@@ -20,6 +21,9 @@ from contracts.token.ERC20.ERC20_base import (
     ERC20_transfer,
     ERC20_transferFrom
 )
+@storage_var
+func has_access(account: felt) -> (level: felt):
+end
 
 @constructor
 func constructor{
@@ -100,18 +104,43 @@ func allowance{
     return (remaining)
 end
 
-# @view
-# func allowlist_level{
-#         syscall_ptr : felt*,
-#         pedersen_ptr : HashBuiltin*,
-#         range_check_ptr
-#     }() -> ():
-
-# end
+@view
+func allowlist_level{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(account: felt) -> (level: felt):
+    let (level: felt) = has_access.read(account)
+    return (level)
+end
 
 #
 # Externals
 #
+
+@external
+func request_allowlist{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (level_granted: felt):
+    let (caller) = get_caller_address()
+    let level_granted = 1
+    has_access.write(caller, level_granted)
+    return (level_granted)
+end
+
+@external
+func request_allowlist_level{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(level_requested: felt) -> (level_granted: felt):
+    let (caller) = get_caller_address()
+    let level_granted = level_requested
+    has_access.write(caller, level_granted)
+    return (level_granted)
+end
 
 @external
 func get_tokens{
@@ -119,11 +148,21 @@ func get_tokens{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }() -> (amount: Uint256):
-    let amount: Uint256 = Uint256(2*1000000000000000000, 0)
-    faucet()
+    let amount: Uint256 = Uint256(100*1000000000000000000, 0)
     let (caller) = get_caller_address()
-    ERC20_transfer(caller, amount)
-    return (amount)
+    let (whitelist_level: felt) = has_access.read(caller)
+    if whitelist_level == 1:
+        ERC20_mint(caller, amount)
+        return (amount)
+    else:
+        if whitelist_level == 2:
+            let total_amount: Uint256 = Uint256(200*1000000000000000000, 0)
+            ERC20_mint(caller, total_amount)
+            return (total_amount)
+        end
+    end
+    let zero: Uint256 = Uint256(0, 0)
+    return (zero)
 end
 
 @external
