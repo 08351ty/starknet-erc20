@@ -33,7 +33,6 @@ func constructor{
         range_check_ptr
     }(_dummy_token_address: felt):
     dummy_token_address_storage.write(_dummy_token_address)
-    IDTKERC20.approve(_dummy_token_address, get_contract_address, Uint256(1000000000*1000000000000000000,0))
     return ()
 end
 
@@ -45,10 +44,6 @@ end
 func dummy_token_address_storage() -> (dummy_token_address_storage: felt):
 end
 
-
-# func deposit_tokens(amount : Uint256) -> (total_amount : Uint256):
-# end
-
 @view
 func tokens_in_custody{
         syscall_ptr : felt*,
@@ -56,6 +51,22 @@ func tokens_in_custody{
         range_check_ptr
     }(account : felt) -> (amount : Uint256):
     return account_balance.read(account)
+end
+
+@external
+func deposit_tokens{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(amount : Uint256) -> (total_amount : Uint256):
+    let (caller) = get_caller_address()
+    let (read_dtk_address) = dummy_token_address_storage.read()
+    let (contract_address) = get_contract_address()
+    IDTKERC20.transferFrom(read_dtk_address, caller, contract_address, amount)
+    let (current_amount: Uint256) = account_balance.read(caller)
+    let (total_amount, _) = uint256_add(current_amount, amount)
+    account_balance.write(caller, total_amount)
+    return (amount)
 end
 
 @external
@@ -91,15 +102,7 @@ func withdraw_all_tokens{
     return (all_tokens)
 end
 
-func contract_approval{
-        syscall_ptr : felt*,
-        pedersen_ptr : HashBuiltin*,
-        range_check_ptr
-    }() -> (success: felt):
-    let (read_dtk_address) = dummy_token_address_storage.read()
-    let (exercise_solution_address) = get_contract_address()
-    IDTKERC20.approve(read_dtk_address, exercise_solution_address, Uint256(1000000000*1000000000000000000,0))
-    return (1)
-end
+# @external
 # func deposit_tracker_token() -> (deposit_tracker_token_address : felt):
+
 # end
