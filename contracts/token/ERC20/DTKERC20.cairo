@@ -117,6 +117,16 @@ func faucet{
     return (1)
 end
 
+func mint{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(account: felt, amount: Uint256) -> (success: felt):
+    let (caller) = get_caller_address()
+    ERC20_mint(caller, amount)
+    return (1)
+end
+
 @external
 func transfer{
         syscall_ptr : felt*, 

@@ -36,6 +36,10 @@ func constructor{
     return ()
 end
 
+#########################################################
+############### storage variables #######################
+#########################################################
+
 @storage_var
 func account_balance(account: felt) -> (balance: Uint256):
 end
@@ -43,6 +47,14 @@ end
 @storage_var
 func dummy_token_address_storage() -> (dummy_token_address_storage: felt):
 end
+
+@storage_var
+func EST_token_address_storage() -> (account: felt):
+end
+
+#########################################################
+############### view functions ##########################
+#########################################################
 
 @view
 func tokens_in_custody{
@@ -53,15 +65,45 @@ func tokens_in_custody{
     return account_balance.read(account)
 end
 
+@view
+func deposit_tracker_token{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (deposit_tracker_token_address : felt):
+    let (deposit_tracker_token_address : felt) = EST_token_address_storage.read()
+    return (deposit_tracker_token_address)
+
+end
+
+#########################################################
+########### internal functions ##########################
+#########################################################
+
+# func increase_account_balance{
+#         syscall_ptr : felt*,
+#         pedersen_ptr : HashBuiltin*,
+#         range_check_ptr
+#     }(amount: Uint256) -> ():
+
+# end
+
+#########################################################
+########### external functions ##########################
+#########################################################
+
 @external
 func deposit_tokens{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(amount : Uint256) -> (total_amount : Uint256):
+    let EST_token_address = deposit_tracker_token
     let (caller) = get_caller_address()
     let (read_dtk_address) = dummy_token_address_storage.read()
     let (contract_address) = get_contract_address()
+    # sth is wrong with this
+    IDTKERC20.mint(EST_token_address, caller, amount)
     IDTKERC20.transferFrom(read_dtk_address, caller, contract_address, amount)
     let (current_amount: Uint256) = account_balance.read(caller)
     let (total_amount, _) = uint256_add(current_amount, amount)
@@ -102,7 +144,12 @@ func withdraw_all_tokens{
     return (all_tokens)
 end
 
-# @external
-# func deposit_tracker_token() -> (deposit_tracker_token_address : felt):
-
-# end
+@external
+func set_deposit_tracker_token{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(deposit_tracker_token_address: felt) -> ():
+    EST_token_address_storage.write(deposit_tracker_token_address)
+    return ()
+end

@@ -8,6 +8,9 @@ namespace IDTKERC20:
     func faucet() -> (success : felt):
     end
 
+    func mint(account : felt, amount : Uint256) -> (success : felt):
+    end
+
     func name() -> (name : felt):
     end
 

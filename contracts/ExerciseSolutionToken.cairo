@@ -2,7 +2,7 @@
 
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256
-from starkware.starknet.common.syscalls import get_caller_address
+from starkware.starknet.common.syscalls import (get_caller_address, get_contract_address)
 
 from contracts.token.ERC20.ERC20_base import (
     ERC20_name,
@@ -33,7 +33,12 @@ func constructor{
         recipient: felt
     ):
     ERC20_initializer(name, symbol, initial_supply, recipient)
+    address_authorization_storage.write(recipient)
     return ()
+end
+
+@storage_var
+func address_authorization_storage() -> (account: felt):
 end
 
 #
@@ -98,6 +103,16 @@ func allowance{
     }(owner: felt, spender: felt) -> (remaining: Uint256):
     let (remaining: Uint256) = ERC20_allowance(owner, spender)
     return (remaining)
+end
+
+@view
+func address_authorization{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (account: felt):
+    let EST_token_address: felt = address_authorization_storage.read()
+    return (EST_token_address)
 end
 
 #
@@ -175,3 +190,4 @@ func decreaseAllowance{
     # Cairo equivalent to 'return (true)'
     return (1)
 end
+
