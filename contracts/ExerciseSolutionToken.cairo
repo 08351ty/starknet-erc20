@@ -12,6 +12,7 @@ from contracts.token.ERC20.ERC20_base import (
     ERC20_balanceOf,
     ERC20_allowance,
     ERC20_mint,
+    ERC20_burn,
 
     ERC20_initializer,
     ERC20_approve,
@@ -129,6 +130,28 @@ func faucet{
     let (caller) = get_caller_address()
     ERC20_mint(caller, amount)
     # Cairo equivalent to 'return (true)'
+    return (1)
+end
+
+@external
+func mint{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(account: felt, amount: Uint256) -> (success: felt):
+    let (caller) = get_caller_address()
+    ERC20_mint(caller, amount)
+    return (1)
+end
+
+@external
+func burn{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(account: felt, amount: Uint256) -> (success: felt):
+    let (caller) = get_caller_address()
+    ERC20_burn(caller, amount)
     return (1)
 end
 

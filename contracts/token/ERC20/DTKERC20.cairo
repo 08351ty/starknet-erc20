@@ -118,6 +118,7 @@ func faucet{
     return (1)
 end
 
+@external
 func mint{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
@@ -128,9 +129,10 @@ func mint{
     return (1)
 end
 
+@external
 func burn{
         syscall_ptr : felt*,
-        pedersen_ptr : HashBuitin*,
+        pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(account: felt, amount: Uint256) -> (success: felt):
     let (caller) = get_caller_address()

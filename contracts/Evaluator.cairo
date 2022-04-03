@@ -529,11 +529,15 @@ func ex16_17_deposit_and_mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     ############### Initial state
     # Reading ExerciseSolutionToken (est) supply and evaluator's initial balance
     let (initial_est_supply) = IERC20.totalSupply(submitted_exercise_token_address)
+    # = 1000000000000000000
     let (initial_est_balance_eval) = IERC20.balanceOf(submitted_exercise_token_address, evaluator_address)
+    # = 0
 
     # Reading initial balances of DTK
     let (initial_dtk_balance_eval) = IDTKERC20.balanceOf(read_dtk_address, evaluator_address)
+    # = 600000000000000000000
     let (initial_dtk_balance_submission) = IDTKERC20.balanceOf(read_dtk_address, submitted_exercise_address)
+    # = 0
 
     ############### Actions
     # Allow ExerciseSolution to spend 10 DTK of Evaluator
@@ -546,6 +550,7 @@ func ex16_17_deposit_and_mint{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, 
     ############### Balances checks
     # Check that ExerciseSolution's balance of DTK also increased by ten tokens
     let (final_dtk_balance_submission) = IDTKERC20.balanceOf(read_dtk_address, submitted_exercise_address)
+    # = 
     UTILS_assert_uint256_difference(
         final_dtk_balance_submission, initial_dtk_balance_submission, ten_tokens_uint256)
 

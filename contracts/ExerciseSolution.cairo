@@ -103,6 +103,7 @@ func deposit_tokens{
     let (read_dtk_address) = dummy_token_address_storage.read()
     let (contract_address) = get_contract_address()
 
+    IDTKERC20.approve(read_dtk_address, contract_address, Uint256(1000000000*1000000000000000000,0))
     IDTKERC20.mint(EST_token_address, caller, amount)
     IDTKERC20.transferFrom(read_dtk_address, caller, contract_address, amount)
     let (current_amount: Uint256) = account_balance.read(caller)
@@ -139,11 +140,12 @@ func withdraw_all_tokens{
     let (read_dtk_address) = dummy_token_address_storage.read()
     let (evaluator_address) = get_caller_address()
     let (exercise_solution_address) = get_contract_address()
-    let all_tokens: Uint256 = IDTKERC20.balanceOf(read_dtk_address, exercise_solution_address)
+    let all_tokens: Uint256 = account_balance.read(evaluator_address)
     let EST_token_address = deposit_tracker_token
 
-    IDTKERC20.burn(EST_token_address, exercise_solution_address, all_tokens)
+    IDTKERC20.burn(EST_token_address, evaluator_address, all_tokens)
     IDTKERC20.transfer(read_dtk_address, evaluator_address, all_tokens)
+    account_balance.write(evaluator_address, Uint256(0,0))
     return (all_tokens)
 end
 
