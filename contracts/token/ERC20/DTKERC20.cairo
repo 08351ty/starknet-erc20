@@ -12,6 +12,7 @@ from contracts.token.ERC20.ERC20_base import (
     ERC20_balanceOf,
     ERC20_allowance,
     ERC20_mint,
+    ERC20_burn,
 
     ERC20_initializer,
     ERC20_approve,
@@ -124,6 +125,16 @@ func mint{
     }(account: felt, amount: Uint256) -> (success: felt):
     let (caller) = get_caller_address()
     ERC20_mint(caller, amount)
+    return (1)
+end
+
+func burn{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuitin*,
+        range_check_ptr
+    }(account: felt, amount: Uint256) -> (success: felt):
+    let (caller) = get_caller_address()
+    ERC20_burn(caller, amount)
     return (1)
 end
 

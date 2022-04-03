@@ -11,6 +11,9 @@ namespace IDTKERC20:
     func mint(account : felt, amount : Uint256) -> (success : felt):
     end
 
+    func burn(account : felt, amount : Uint256) -> (success : felt):
+    end
+
     func name() -> (name : felt):
     end
 
